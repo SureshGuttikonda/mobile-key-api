@@ -11,26 +11,44 @@ import java.util.stream.IntStream;
 import org.mk.generator.constants.MobileKeyConstants;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author Suresh Guttikonda
+ *
+ */
+
 @Service
 public class MobileKeyServiceImpl implements MobileKeyService {
 	
 	private static final int NBR_OF_RECORDS_PER_PAGE = 10;
 	
+	/**
+	 *
+	 */
 	@Override
 	public Map<String, Set<String>> getMobileKeys(String mobileNbr, int recordsPerPage) {
-		
+
 		List<String> generatedMobileKeys = new ArrayList<>();
 		Map<String, Set<String>> mobileKeysPageMap = new HashMap<>();
-		if(recordsPerPage <= 0)
+		if (recordsPerPage <= 0)
 			recordsPerPage = NBR_OF_RECORDS_PER_PAGE;
-		
+
 		addMobileKeys(mobileNbr.toCharArray(), generatedMobileKeys);
-		
+
 		populateMobileKeysPageMap(mobileNbr, mobileKeysPageMap, generatedMobileKeys, recordsPerPage);
-		
+
 		return mobileKeysPageMap;
 	}
 
+	/**
+	 * This method splits the generated keys into
+	 * individual collection based on the user request of
+	 * maximum no of keys to be displayed per page
+	 *   
+	 * @param mobileNbr
+	 * @param mobileKeysPageMap
+	 * @param generatedMobileKeys
+	 * @param recordsPerPage
+	 */
 	private void populateMobileKeysPageMap(String mobileNbr, Map<String, Set<String>> mobileKeysPageMap, List<String> generatedMobileKeys,
 			int recordsPerPage) {
 		int maxKeys = mobileNbr.length() * MobileKeyConstants.ALPHABETS_NBR;
@@ -54,6 +72,14 @@ public class MobileKeyServiceImpl implements MobileKeyService {
 		}
 	}
 
+	/**
+	 * Method to calculate total pages based on records per page
+	 *  and the total count of mobile keys generated
+	 *  
+	 * @param recordsPerPage
+	 * @param maxKeys
+	 * @return
+	 */
 	private int getTotalPages(int recordsPerPage, int maxKeys) {
 		
 		int pages = maxKeys / recordsPerPage;
@@ -64,6 +90,13 @@ public class MobileKeyServiceImpl implements MobileKeyService {
 	}
 
 	
+	/**
+	 * Method to generate the all combinations of Mobile Keys
+	 *  and add them to the list
+	 *  
+	 * @param mobileNbrCharArray
+	 * @param generatedMobileKeys
+	 */
 	private void addMobileKeys(char[] mobileNbrCharArray, List<String> generatedMobileKeys) {
 		IntStream.rangeClosed(1, mobileNbrCharArray.length).forEach(replacementPosition -> {
 			String newMobileNbrStr = new String(mobileNbrCharArray);
@@ -75,18 +108,6 @@ public class MobileKeyServiceImpl implements MobileKeyService {
 						generatedMobileKeys.add(String.valueOf(newMobileChar));
 					});
 		});
-	}
-
-	private char getChar() {
-		int leftLimit = 65;
-		int rightLimit = 90;
-		int randomLimitedInt = getRandomLimitedIntValue(leftLimit, rightLimit);
-		return (char) randomLimitedInt;
-	}
-
-	private int getRandomLimitedIntValue(int startLimit, int endLimit) {
-		int randomLimitedInt = startLimit + (int) (Math.random() * (endLimit - startLimit + 1));
-		return randomLimitedInt;
 	}
 
 	

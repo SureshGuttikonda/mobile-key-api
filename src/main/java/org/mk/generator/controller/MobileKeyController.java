@@ -25,7 +25,16 @@ public class MobileKeyController {
 	@Autowired
 	public MobileKeyService mobileKeyService;
 	
-	@RequestMapping(value = MobileKeyConstants.MOBILE_KEY_URI, method = RequestMethod.GET, produces ="application/json")
+	/**
+	 * API method to return the appropriate collection of mobile keys,
+	 *  based on the requested page number
+	 *  
+	 * @param mobile_nbr
+	 * @param pageNbr
+	 * @param recordsPerPage
+	 * @return
+	 */
+	@RequestMapping(value = MobileKeyConstants.MOBILE_KEY_URI, method = RequestMethod.GET, produces = "application/json")
 	public ResponseEntity<MobileKeyVO> getMobileKey(@PathVariable String mobile_nbr, @RequestParam int pageNbr,
 			@RequestParam int recordsPerPage) {
 		
@@ -35,10 +44,27 @@ public class MobileKeyController {
 			mobileKeysMap = mobileKeyService.getMobileKeys(mobile_nbr, recordsPerPage);
 			globalMobileKeysMap.put(mobile_nbr, mobileKeysMap);
 		}
-			
 		
-		MobileKeyVO mobileKeyVO = MobileKeyVOTranform.mobileKeyDataTransform(mobileKeysMap.get(mobile_nbr+"_"+pageNbr), mobile_nbr, pageNbr);
+		int mobileKeysTotal = getTotalMobilKeys(globalMobileKeysMap.get(mobile_nbr));
+		
+		MobileKeyVO mobileKeyVO = MobileKeyVOTranform.mobileKeyDataTransform(
+				mobileKeysMap.get(mobile_nbr + "_" + pageNbr), mobile_nbr, pageNbr, mobileKeysTotal);
 		return new ResponseEntity<MobileKeyVO>(mobileKeyVO, HttpStatus.OK);
+	}
+
+	/**
+	 * Get the total no. of keys generated
+	 * 
+	 * @param mobileKeysMap
+	 * @return
+	 */
+	private int getTotalMobilKeys(Map<String, Set<String>> mobileKeysMap) {
+		int totalMobileKeys = 0;
+		Set<String> mobileKeySet = mobileKeysMap.keySet();
+		for(String mobileKey: mobileKeySet) {
+			totalMobileKeys += mobileKeysMap.get(mobileKey).size();
+		}
+		return totalMobileKeys;
 	}
 	
 	
